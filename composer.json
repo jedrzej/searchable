@@ -1,0 +1,17 @@
+{
+  "name": "jedrzej/searchable",
+  "description": "",
+  "keywords": ["laravel", "search", "searchable", "filter", "eloquent"],
+  "homepage": "https://github.com/jedrzej/searchable",
+  "license": "",
+  "authors": [
+    {
+      "name": "Jędrzej Kuryło",
+      "email": "jedrzej.kurylo@gmail.com",
+    }
+  ],
+  "require": {},
+  "autoload": {
+    "psr-4": {"Jedrzej\\": "src/Jedrzej/"}
+  }
+}
