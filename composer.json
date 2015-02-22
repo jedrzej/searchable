@@ -1,17 +1,24 @@
 {
   "name": "jedrzej/searchable",
-  "description": "",
+  "description": "Searchable trait for Laravel's Eloquent models",
   "keywords": ["laravel", "search", "searchable", "filter", "eloquent"],
   "homepage": "https://github.com/jedrzej/searchable",
   "license": "",
   "authors": [
     {
       "name": "Jędrzej Kuryło",
-      "email": "jedrzej.kurylo@gmail.com",
+      "email": "jedrzej.kurylo@gmail.com"
     }
   ],
-  "require": {},
+  "require": {
+    "codeception/codeception": "2.0.*",
+    "codeception/specify": "*",
+    "laravel/framework": "*"
+  },
   "autoload": {
-    "psr-4": {"Jedrzej\\": "src/Jedrzej/"}
+    "psr-4": {
+      "Jedrzej\\": "src/Jedrzej/",
+      "Illuminate\\": "vendor/laravel/framework/src/Illuminate/"
+    }
   }
 }

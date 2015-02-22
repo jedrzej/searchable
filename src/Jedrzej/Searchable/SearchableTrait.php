@@ -1,8 +1,8 @@
 <?php namespace Jedrzej\Searchable;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Str;
-use Input;
 
 trait SearchableTrait
 {
@@ -38,10 +38,9 @@ trait SearchableTrait
     protected function getConstraints(Builder $builder, array $query)
     {
         $constraints = [];
-        foreach ($query as $filter => $value) {
-            $field = $this->getField($filter);
+        foreach ($query as $field => $value) {
             if ($this->isFieldSearchable($builder, $field)) {
-                $constraints[$field] = Constraint::make($filter, $value);
+                $constraints[$field] = Constraint::make($value);
             }
         }
 
@@ -66,10 +65,10 @@ trait SearchableTrait
     /**
      * Applies constraints to query, allowing model to overwrite any of them
      *
-     * @param Builder $builder     query builder
-     * @param         $constraints constraints
+     * @param Builder      $builder     query builder
+     * @param Constraint[] $constraints constraints
      */
-    protected function applyConstraints(Builder $builder, $constraints)
+    protected function applyConstraints(Builder $builder, array $constraints)
     {
         foreach ($constraints as $field => $constraint) {
 
@@ -85,13 +84,13 @@ trait SearchableTrait
     /**
      * Calls constraint interceptor on model
      *
-     * @param Builder $builder    query builder
-     * @param         $field      field on which constraint is applied
-     * @param         $constraint constraint
+     * @param Builder    $builder    query builder
+     * @param string     $field      field on which constraint is applied
+     * @param Constraint $constraint constraint
      *
      * @return bool true if constraint was intercepted by model's method
      */
-    protected function callInterceptor(Builder $builder, $field, $constraint)
+    protected function callInterceptor(Builder $builder, $field, Constraint $constraint)
     {
         $model = $builder->getModel();
         $interceptor = sprintf('process%sFilter', Str::studly($field));
@@ -103,19 +102,5 @@ trait SearchableTrait
         }
 
         return false;
-    }
-
-    /**
-     * Gets field name from filter
-     *
-     * @param string $filter query key
-     *
-     * @return mixed
-     */
-    protected function getField($filter)
-    {
-        $field = preg_replace('/_(from|to)$/', '', $filter);
-
-        return $field;
     }
 }
