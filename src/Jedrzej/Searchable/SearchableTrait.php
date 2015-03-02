@@ -7,14 +7,14 @@ use Illuminate\Support\Str;
 trait SearchableTrait
 {
     /**
-     * Should return list of searchable fields
+     * Should return list of searchable fields.
      *
      * @return array
      */
     abstract public function getSearchableAttributes();
 
     /**
-     * Applies filters
+     * Applies filters.
      *
      * @param Builder $builder query builder
      * @param array   $query   query parameters to use for search - Input::all() is used by default
@@ -28,7 +28,7 @@ trait SearchableTrait
     }
 
     /**
-     * Builds search constraints based on model's searchable fields and query parameters
+     * Builds search constraints based on model's searchable fields and query parameters.
      *
      * @param Builder $builder query builder
      * @param array   $query   query parameters
@@ -48,7 +48,7 @@ trait SearchableTrait
     }
 
     /**
-     * Check if field is searchable for given model
+     * Check if field is searchable for given model.
      *
      * @param Builder $builder query builder
      * @param string  $field   field name
@@ -63,7 +63,7 @@ trait SearchableTrait
     }
 
     /**
-     * Applies constraints to query, allowing model to overwrite any of them
+     * Applies constraints to query, allowing model to overwrite any of them.
      *
      * @param Builder      $builder     query builder
      * @param Constraint[] $constraints constraints
@@ -82,7 +82,7 @@ trait SearchableTrait
     }
 
     /**
-     * Calls constraint interceptor on model
+     * Calls constraint interceptor on model.
      *
      * @param Builder    $builder    query builder
      * @param string     $field      field on which constraint is applied

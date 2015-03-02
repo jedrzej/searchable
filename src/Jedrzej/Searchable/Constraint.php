@@ -1,6 +1,7 @@
 <?php namespace Jedrzej\Searchable;
 
 use Illuminate\Database\Eloquent\Builder;
+use InvalidArgumentException;
 
 class Constraint
 {
@@ -34,7 +35,7 @@ class Constraint
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getValue()
     {
@@ -50,7 +51,7 @@ class Constraint
     }
 
     /**
-     * Creates constraint object for given filter
+     * Creates constraint object for given filter.
      *
      * @param string $value query value
      *
@@ -66,10 +67,10 @@ class Constraint
     }
 
     /**
-     * Applies constraint to query
+     * Applies constraint to query.
      *
      * @param Builder $builder query builder
-     * @param         $field   field name
+     * @param string  $field   field name
      */
     public function apply(Builder $builder, $field)
     {
@@ -83,8 +84,8 @@ class Constraint
     }
 
     /**
-     * @param string $operator operator
-     * @param mixed  $value    value
+     * @param string $operator    operator
+     * @param string $value       value
      * @param bool   $is_negation
      */
     protected function __construct($operator, $value, $is_negation = false)
@@ -95,11 +96,11 @@ class Constraint
     }
 
     /**
-     *  Cleans value and converts to array if needed
+     *  Cleans value and converts to array if needed.
      *
      * @param string $value value
      *
-     * @return array|string
+     * @return string
      */
     protected static function prepareValue($value)
     {
@@ -107,7 +108,7 @@ class Constraint
     }
 
     /**
-     * Check if query constraint is negated
+     * Check if query constraint is negated.
      *
      * @param string $value value
      *
@@ -117,6 +118,7 @@ class Constraint
     {
         if (preg_match('/^!/', $value)) {
             $value = preg_replace('/^!/', '', $value);
+
             return true;
         }
 
@@ -124,16 +126,42 @@ class Constraint
     }
 
     /**
-     * Parse query parameter and get operator and value
+     * Parse query parameter and get operator and value.
      *
      * @param string $value
-     * @param bool $is_negation
+     * @param bool   $is_negation
      *
-     * @return array
+     * @return string[]
+     *
+     * @throws InvalidArgumentException when unable to parse operator or value
      */
     protected static function parseOperatorAndValue($value, $is_negation)
     {
+        if ($result = static::parseComparisonOperator($value, $is_negation)) {
+            return $result;
+        }
+
+        if ($result = static::parseLikeOperator($value, $is_negation)) {
+            return $result;
+        }
+
+        if ($result = static::parseEqualsInOperator($value, $is_negation)) {
+            return $result;
+        }
+
+        throw new InvalidArgumentException(sprintf('Unable to parse operator or value from "%s"', $value));
+    }
+
+    /**
+     * @param string $value
+     * @param bool   $is_negation
+     *
+     * @return string[]|false
+     */
+    protected static function parseComparisonOperator($value, $is_negation)
+    {
         if (preg_match('/^\((gt|ge|lt|le)\)(.+)$/', $value, $match)) {
+            $operator = null;
             switch ($match[1]) {
                 case 'gt':
                     $operator = $is_negation ? static::OPERATOR_LESS_EQUAL : static::OPERATOR_GREATER;
@@ -154,10 +182,32 @@ class Constraint
             return [$operator, $value];
         }
 
+        return false;
+    }
+
+    /**
+     * @param string $value
+     * @param bool   $is_negation
+     *
+     * @return string[]|false
+     */
+    protected static function parseLikeOperator($value, $is_negation)
+    {
         if (preg_match('/(^%.+)|(.+%$)/', $value)) {
             return [$is_negation ? static::OPERATOR_NOT_LIKE : static::OPERATOR_LIKE, $value];
         }
 
+        return false;
+    }
+
+    /**
+     * @param string $value
+     * @param bool   $is_negation
+     *
+     * @return string[]
+     */
+    protected static function parseEqualsInOperator($value, $is_negation)
+    {
         if (strpos($value, ',') !== false) {
             $value = preg_split('/,/', $value);
         }

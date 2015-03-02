@@ -3,7 +3,7 @@
   "description": "Searchable trait for Laravel's Eloquent models",
   "keywords": ["laravel", "search", "searchable", "filter", "eloquent"],
   "homepage": "https://github.com/jedrzej/searchable",
-  "license": "",
+  "license": "MIT",
   "authors": [
     {
       "name": "Jędrzej Kuryło",
