@@ -92,3 +92,9 @@ Some examples:
     //filter posts older than 2015
     ?created_at=!(ge)2015
     
+### Multiple constraints for single attribute
+It is possible to apply multiple constraints for a single model's attribute. 
+In order to achieve that provide an array of query filters instead of a single filter:
+
+    // filter all posts from year 20** except 2013
+    ?created_at[]=20%&created_at[]=!2013%

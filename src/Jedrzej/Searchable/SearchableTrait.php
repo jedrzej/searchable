@@ -17,7 +17,7 @@ trait SearchableTrait
      * Applies filters.
      *
      * @param Builder $builder query builder
-     * @param array   $query   query parameters to use for search - Input::all() is used by default
+     * @param array $query     query parameters to use for search - Input::all() is used by default
      */
     public function scopeFiltered(Builder $builder, array $query = [])
     {
@@ -31,16 +31,16 @@ trait SearchableTrait
      * Builds search constraints based on model's searchable fields and query parameters.
      *
      * @param Builder $builder query builder
-     * @param array   $query   query parameters
+     * @param array $query     query parameters
      *
      * @return array
      */
     protected function getConstraints(Builder $builder, array $query)
     {
         $constraints = [];
-        foreach ($query as $field => $value) {
+        foreach ($query as $field => $values) {
             if ($this->isFieldSearchable($builder, $field)) {
-                $constraints[$field] = Constraint::make($value);
+                $constraints[$field] = $this->buildConstraints($values);
             }
         }
 
@@ -51,7 +51,7 @@ trait SearchableTrait
      * Check if field is searchable for given model.
      *
      * @param Builder $builder query builder
-     * @param string  $field   field name
+     * @param string $field    field name
      *
      * @return bool
      */
@@ -65,27 +65,27 @@ trait SearchableTrait
     /**
      * Applies constraints to query, allowing model to overwrite any of them.
      *
-     * @param Builder      $builder     query builder
+     * @param Builder $builder          query builder
      * @param Constraint[] $constraints constraints
      */
     protected function applyConstraints(Builder $builder, array $constraints)
     {
         foreach ($constraints as $field => $constraint) {
-
-            // let model handle the constraint if it has the interceptor
-            if ($this->callInterceptor($builder, $field, $constraint)) {
-                continue;
+            if (is_array($constraint)) {
+                foreach ($constraint as $single_constraint) {
+                    $this->applyConstraint($builder, $field, $single_constraint);
+                }
+            } else {
+                $this->applyConstraint($builder, $field, $constraint);
             }
-
-            $constraint->apply($builder, $field);
         }
     }
 
     /**
      * Calls constraint interceptor on model.
      *
-     * @param Builder    $builder    query builder
-     * @param string     $field      field on which constraint is applied
+     * @param Builder $builder       query builder
+     * @param string $field          field on which constraint is applied
      * @param Constraint $constraint constraint
      *
      * @return bool true if constraint was intercepted by model's method
@@ -102,5 +102,40 @@ trait SearchableTrait
         }
 
         return false;
+    }
+
+    /**
+     * Build Constraint objects from given filter values
+     *
+     * @param string []|string
+     *
+     * @return Constraint[]|Constraint
+     */
+    protected function buildConstraints($values)
+    {
+        if (is_array($values)) {
+            $constraints = [];
+            foreach ($values as $value) {
+                $constraints[] = Constraint::make($value);
+            }
+            return $constraints;
+        } else {
+            return Constraint::make($values);
+        }
+    }
+
+    /**
+     * Apply a single constraint - either directly or using model's interceptor
+     *
+     * @param Builder    $builder    query builder
+     * @param string     $field      field name
+     * @param Constraint $constraint constraint
+     */
+    protected function applyConstraint(Builder $builder, $field, $constraint)
+    {
+        // let model handle the constraint if it has the interceptor
+        if (!$this->callInterceptor($builder, $field, $constraint)) {
+            $constraint->apply($builder, $field);
+        }
     }
 }
