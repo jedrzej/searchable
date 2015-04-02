@@ -20,6 +20,9 @@ class Constraint
     const OPERATOR_IN = 'in';
     const OPERATOR_NOT_IN = 'not in';
 
+    const MODE_AND = 'and';
+    const MODE_OR = 'or';
+
     protected $operator;
 
     protected $value;
@@ -71,21 +74,25 @@ class Constraint
      *
      * @param Builder $builder query builder
      * @param string  $field   field name
+     * @param string  $mode    determines how constraint is added to existing query ("or" or "and")
      */
-    public function apply(Builder $builder, $field)
+    public function apply(Builder $builder, $field, $mode = Constraint::MODE_AND)
     {
         if ($this->operator == Constraint::OPERATOR_IN) {
-            $builder->whereIn($field, $this->value);
+            $method = $mode != static::MODE_OR ? 'whereIn' : 'orWhereIn';
+            $builder->$method($field, $this->value);
         } elseif ($this->operator == Constraint::OPERATOR_NOT_IN) {
-            $builder->whereNotIn($field, $this->value);
+            $method = $mode != static::MODE_OR ? 'whereNotIn' : 'orWhereNotIn';
+            $builder->$method($field, $this->value);
         } else {
-            $builder->where($field, $this->operator, $this->value);
+            $method = $mode != static::MODE_OR ? 'where' : 'orWhere';
+            $builder->$method($field, $this->operator, $this->value);
         }
     }
 
     /**
-     * @param string $operator    operator
-     * @param string $value       value
+     * @param string $operator operator
+     * @param string $value    value
      * @param bool   $is_negation
      */
     protected function __construct($operator, $value, $is_negation = false)

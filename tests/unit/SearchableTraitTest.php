@@ -2,6 +2,7 @@
 
 use Codeception\Specify;
 use Codeception\TestCase\Test;
+use Jedrzej\Searchable\Constraint;
 
 class SearchableTraitTest extends Test
 {
@@ -150,6 +151,30 @@ class SearchableTraitTest extends Test
             $this->assertEquals('2013%', $wheres[1]['value']);
             $this->assertEquals('not like', $wheres[1]['operator']);
             $this->assertEquals('field1', $wheres[1]['column']);
+        });
+
+        $this->specify("mode is recognized and applied correctly", function() {
+            $this->assertCount(2, (array)TestModel::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'and'])->getQuery()->wheres);
+            foreach (TestModel::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'and'])->getQuery()->wheres as $where) {
+                $this->assertEquals(Constraint::MODE_AND, $where['boolean']);
+            }
+
+            $this->assertCount(2, (array)TestModel::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'or'])->getQuery()->wheres);
+            foreach (TestModel::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'or'])->getQuery()->wheres as $where) {
+                $this->assertEquals(Constraint::MODE_OR, $where['boolean']);
+            }
+        });
+
+        $this->specify("AND mode is the default value if no mode or invalid mode is provided", function() {
+            $this->assertCount(2, (array)TestModel::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'invalid'])->getQuery()->wheres);
+            foreach (TestModel::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'invalid'])->getQuery()->wheres as $where) {
+                $this->assertEquals(Constraint::MODE_AND, $where['boolean']);
+            }
+
+            $this->assertCount(2, (array)TestModel::filtered(['field1' => 5, 'field2' => 3])->getQuery()->wheres);
+            foreach (TestModel::filtered(['field1' => 5, 'field2' => 3])->getQuery()->wheres as $where) {
+                $this->assertEquals(Constraint::MODE_AND, $where['boolean']);
+            }
         });
     }
 }

@@ -13,25 +13,31 @@ trait SearchableTrait
      */
     abstract public function getSearchableAttributes();
 
+    public function getQueryModeParameterName()
+    {
+        return 'mode';
+    }
+
     /**
      * Applies filters.
      *
      * @param Builder $builder query builder
-     * @param array $query     query parameters to use for search - Input::all() is used by default
+     * @param array   $query   query parameters to use for search - Input::all() is used by default
      */
     public function scopeFiltered(Builder $builder, array $query = [])
     {
         $query = $query ?: Input::all();
 
         $constraints = $this->getConstraints($builder, $query);
-        $this->applyConstraints($builder, $constraints);
+        $mode = $this->getQueryMode($query);
+        $this->applyConstraints($builder, $constraints, $mode);
     }
 
     /**
      * Builds search constraints based on model's searchable fields and query parameters.
      *
      * @param Builder $builder query builder
-     * @param array $query     query parameters
+     * @param array   $query   query parameters
      *
      * @return array
      */
@@ -51,7 +57,7 @@ trait SearchableTrait
      * Check if field is searchable for given model.
      *
      * @param Builder $builder query builder
-     * @param string $field    field name
+     * @param string  $field   field name
      *
      * @return bool
      */
@@ -65,18 +71,19 @@ trait SearchableTrait
     /**
      * Applies constraints to query, allowing model to overwrite any of them.
      *
-     * @param Builder $builder          query builder
+     * @param Builder      $builder     query builder
      * @param Constraint[] $constraints constraints
+     * @param string       $mode        determines how constraints are applied ("or" or "and")
      */
-    protected function applyConstraints(Builder $builder, array $constraints)
+    protected function applyConstraints(Builder $builder, array $constraints, $mode = Constraint::MODE_AND)
     {
         foreach ($constraints as $field => $constraint) {
             if (is_array($constraint)) {
                 foreach ($constraint as $single_constraint) {
-                    $this->applyConstraint($builder, $field, $single_constraint);
+                    $this->applyConstraint($builder, $field, $single_constraint, $mode);
                 }
             } else {
-                $this->applyConstraint($builder, $field, $constraint);
+                $this->applyConstraint($builder, $field, $constraint, $mode);
             }
         }
     }
@@ -84,8 +91,8 @@ trait SearchableTrait
     /**
      * Calls constraint interceptor on model.
      *
-     * @param Builder $builder       query builder
-     * @param string $field          field on which constraint is applied
+     * @param Builder    $builder    query builder
+     * @param string     $field      field on which constraint is applied
      * @param Constraint $constraint constraint
      *
      * @return bool true if constraint was intercepted by model's method
@@ -130,12 +137,25 @@ trait SearchableTrait
      * @param Builder    $builder    query builder
      * @param string     $field      field name
      * @param Constraint $constraint constraint
+     * @param string     $mode       determines how constraint is applied ("or" or "and")
      */
-    protected function applyConstraint(Builder $builder, $field, $constraint)
+    protected function applyConstraint(Builder $builder, $field, $constraint, $mode = Constraint::MODE_AND)
     {
         // let model handle the constraint if it has the interceptor
         if (!$this->callInterceptor($builder, $field, $constraint)) {
-            $constraint->apply($builder, $field);
+            $constraint->apply($builder, $field, $mode);
         }
+    }
+
+    /**
+     * Determines how constraints are applied ("or" or "and")
+     *
+     * @param array $query query parameters
+     *
+     * @return mixed
+     */
+    protected function getQueryMode(array $query = [])
+    {
+        return array_get($query, $this->getQueryModeParameterName(), Constraint::MODE_AND);
     }
 }

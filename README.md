@@ -41,6 +41,11 @@ In order to make an Eloquent model searchable, add the trait to the model and de
     
     // if you append ?forum_id=<operator> to the URL, you'll get all Posts with <operator> applied to forum_id
     Post::filtered()->get();
+
+## Choosing query mode
+The default query mode is to apply conjunction (```AND```) of all queries to searchable model. It can be changed to disjunction (```OR```)
+by setting value of `mode` query paramter to `or`. If the `mode` query parameter is already in use, name returned by `getQueryMode` method
+will be used.
  
 ## Building a query
 
