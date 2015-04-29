@@ -1,7 +1,13 @@
 {
   "name": "jedrzej/searchable",
   "description": "Searchable trait for Laravel's Eloquent models",
-  "keywords": ["laravel", "search", "searchable", "filter", "eloquent"],
+  "keywords": [
+    "laravel",
+    "search",
+    "searchable",
+    "filter",
+    "eloquent"
+  ],
   "homepage": "https://github.com/jedrzej/searchable",
   "license": "MIT",
   "authors": [
@@ -11,9 +17,11 @@
     }
   ],
   "require": {
-    "codeception/codeception": "2.0.*",
-    "codeception/specify": "*",
     "laravel/framework": "*"
+  },
+  "require-dev": {
+    "codeception/codeception": "2.0.*",
+    "codeception/specify": "*"
   },
   "autoload": {
     "psr-4": {
