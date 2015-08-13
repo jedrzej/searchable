@@ -85,6 +85,9 @@ Like operators allow filtering using `LIKE` query. This operator is triggered if
 In order to filter posts that start with `How`, the following query should be used:
 
     ?title=How%
+
+```Notice:``` percentage character is used to encode special characters in URLs, so when sending the request make sure the tools
+you use properly ```encode the % character as %25```
     
 ### Negation operator
 It is possible to get negated results of a query by prepending the operator with `!`.
