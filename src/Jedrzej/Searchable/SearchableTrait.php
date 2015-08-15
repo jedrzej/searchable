@@ -3,16 +3,10 @@
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 trait SearchableTrait
 {
-    /**
-     * Should return list of searchable fields.
-     *
-     * @return array
-     */
-    abstract public function getSearchableAttributes();
-
     public function getQueryModeParameterName()
     {
         return 'mode';
@@ -63,9 +57,9 @@ trait SearchableTrait
      */
     protected function isFieldSearchable(Builder $builder, $field)
     {
-        $searchable = $builder->getModel()->getSearchableAttributes();
+        $searchable = $this->_getSearchableAttributes($builder);
 
-        return in_array($field, $searchable);
+        return in_array($field, $searchable) || in_array('*', $searchable);
     }
 
     /**
@@ -157,5 +151,21 @@ trait SearchableTrait
     protected function getQueryMode(array $query = [])
     {
         return array_get($query, $this->getQueryModeParameterName(), Constraint::MODE_AND);
+    }
+
+    /**
+     * @param Builder $builder
+     * @return array list of searchable attributes
+     */
+    protected function _getSearchableAttributes(Builder $builder) {
+        if (method_exists($builder->getModel(), 'getSearchableAttributes')) {
+          return $builder->getModel()->getSearchableAttributes();
+        }
+
+        if (property_exists($builder->getModel(), 'searchable')) {
+            return $builder->getModel()->searchable;
+        }
+
+        throw new RuntimeException(sprintf('Model %s must either implement getSearchableAttributes() or have $searchable property set', get_class($builder->getModel())));
     }
 }

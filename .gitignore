@@ -2,3 +2,4 @@ tests/_output/*
 tests/*/*Tester.php
 composer.lock
 vendor
+.idea
