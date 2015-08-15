@@ -15,19 +15,30 @@ or run the following in the commandline in your project's root folder:
 
 ## Setting up searchable models
 
-In order to make an Eloquent model searchable, add the trait to the model and define a list of fields that the model can be filtered by:
+In order to make an Eloquent model searchable, add the trait to the model and define a list of fields that the model can be filtered by.
+You can either define a $searchable property or implement a getSearchableAttributes method if you want to execute some logic to define list of searchable fields.
 
     use Jedrzej\Searchable\SearchableTrait;
     
     class Post extends Eloquent
     {
         use SearchableTrait;
-        
+
+        // either a property holding a list of searchable fields...
+        public $searchable = ['title', 'forum_id', 'user_id', 'created_at'];
+
+        // ...or a method that returns a list of searchable fields
         public function getSearchableAttributes()
         {
             return ['title', 'forum_id', 'user_id', 'created_at'];
         }
     }
+
+In order to make all fields searchable put an asterisk * in the list of searchable fields:
+
+    public $searchable = ['*'];
+
+## Searching moddels
 
 `SearchableTrait` adds a `filtered()` scope to the model - you can pass it a query being an array of filter conditions:
  
