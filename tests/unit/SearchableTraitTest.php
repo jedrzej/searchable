@@ -183,12 +183,12 @@ class SearchableTraitTest extends Test
         });
 
         $this->specify('model must implement getSearchableAttributes() or have $searchable property', function() {
-            TestModel::filtered(['field1' => 5])->getQuery()->wheres;
+            TestModel::filtered(['field1' => 5]);
         }, ['throws' => new RuntimeException]);
 
         $this->specify('* in searchable field list makes all fields searchable', function() {
-            $this->assertCount(1, (array)TestModelWithSearchableProperty::filtered(['field1' => 5])->getQuery()->wheres);
-            $this->assertCount(2, (array)TestModelWithSearchableProperty::filtered(['field1' => 5, 'field2' => 3])->getQuery()->wheres);
+            $this->assertCount(1, (array)TestModelWithAllFieldsSearchable::filtered(['field1' => 5])->getQuery()->wheres);
+            $this->assertCount(2, (array)TestModelWithAllFieldsSearchable::filtered(['field1' => 5, 'field42' => 3])->getQuery()->wheres);
         });
     }
 }
