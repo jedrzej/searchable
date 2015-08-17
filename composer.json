@@ -1,12 +1,15 @@
 {
   "name": "jedrzej/searchable",
-  "description": "Searchable trait for Laravel's Eloquent models",
+  "description": "Searchable trait for Laravel's Eloquent models - filter your models using request parameters",
   "keywords": [
     "laravel",
     "search",
     "searchable",
     "filter",
-    "eloquent"
+    "eloquent",
+    "model",
+    "api",
+    "request"
   ],
   "homepage": "https://github.com/jedrzej/searchable",
   "license": "MIT",
@@ -22,6 +25,10 @@
   "require-dev": {
     "codeception/codeception": "2.0.*",
     "codeception/specify": "*"
+  },
+  "suggest": {
+    "jedrzej/sortable": "Allows sorting your models using request parameters",
+    "jedrzej/withable": "Allows eager loading of relations using request parameters"
   },
   "autoload": {
     "psr-4": {
