@@ -2,21 +2,22 @@
 
 This package adds search/filtering functionality to Eloquent models in Laravel 4/5.
 
-You could also find those 2 packages useful:
+You could also find those packages useful:
 
-- [Sortable](https://github.com/jedrzej/sortable) - Allows sorting your models using request parameters
 - [Withable](https://github.com/jedrzej/withable) - Allows eager loading of relations using request parameters
+- [Sortable](https://github.com/jedrzej/sortable) - Allows sorting your models using request parameters
+- [Pimpable](https://github.com/jedrzej/pimpable) - A meta package that combines Sortable, Searchable and Withable behaviours
 
 ## Composer install
 
 Add the following line to `composer.json` file in your project:
 
-    "jedrzej/searchable": "0.0.5"
+    "jedrzej/searchable": "0.0.6"
 	
 or run the following in the commandline in your project's root folder:	
 
 
-    composer require "jedrzej/searchable" "0.0.5"
+    composer require "jedrzej/searchable" "0.0.6"
 
 ## Setting up searchable models
 
