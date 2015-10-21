@@ -12,12 +12,12 @@ You could also find those packages useful:
 
 Add the following line to `composer.json` file in your project:
 
-    "jedrzej/searchable": "0.0.6"
+    "jedrzej/searchable": "0.0.7"
 	
 or run the following in the commandline in your project's root folder:	
 
 
-    composer require "jedrzej/searchable" "0.0.6"
+    composer require "jedrzej/searchable" "0.0.7"
 
 ## Setting up searchable models
 

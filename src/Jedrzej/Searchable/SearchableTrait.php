@@ -20,10 +20,13 @@ trait SearchableTrait
      */
     public function scopeFiltered(Builder $builder, array $query = [])
     {
-        $query = $query ?: array_except(Input::all(), $this->getQueryModeParameterName());
+        $query = $query ?: Input::all();
 
-        $constraints = $this->getConstraints($builder, $query);
         $mode = $this->getQueryMode($query);
+
+        $query = array_except($query, $this->getQueryModeParameterName());
+        $constraints = $this->getConstraints($builder, $query);
+
         $this->applyConstraints($builder, $constraints, $mode);
     }
 
