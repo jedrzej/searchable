@@ -44,7 +44,7 @@ In order to make all fields searchable put an asterisk * in the list of searchab
 
     public $searchable = ['*'];
 
-## Searching moddels
+## Searching models
 
 `SearchableTrait` adds a `filtered()` scope to the model - you can pass it a query being an array of filter conditions:
  
