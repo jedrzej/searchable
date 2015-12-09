@@ -17,7 +17,7 @@ Add the following line to `composer.json` file in your project:
 or run the following in the commandline in your project's root folder:	
 
 
-    composer require "jedrzej/searchable" "0.0.7"
+    composer require "jedrzej/searchable" "0.0.8"
 
 ## Setting up searchable models
 
@@ -123,3 +123,11 @@ In order to achieve that provide an array of query filters instead of a single f
 
     // filter all posts from year 20** except 2013
     ?created_at[]=20%&created_at[]=!2013%
+
+## Filtering by relation attributes
+It is possible to filter by attributes of model's relations - Eloquent's ```whereHas()``` will be applied. In order to filter
+ by relation, add the relation attribute to the list of ```searchable``` fields in the form ```relation:attribute```. The same string
+ should be used in the query to filter by that relation's attribute, e.g.:
+ 
+     // filter only posts of active users
+     ?user:active=1
