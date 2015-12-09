@@ -78,6 +78,43 @@ class Constraint
      */
     public function apply(Builder $builder, $field, $mode = Constraint::MODE_AND)
     {
+        if ($this->isRelation($field)) {
+            list($relation, $field) = $this->splitRelationField($field);
+            $builder->whereHas($relation, function(Builder $builder) use ($field, $mode) {
+                $this->doApply($builder, $field, $mode) ;
+            });
+        } else {
+            $this->doApply($builder, $field, $mode) ;
+        }
+    }
+
+    /**
+     * Check if given field contains relation name
+     *
+     * @param string $field field name
+     * @return bool true if field contains relation name
+     */
+    protected function isRelation($field) {
+        return strpos($field, ':') !== false;
+    }
+
+    /**
+     * Splits given field name containing relation name into relation name and field name
+     * @param string $field field name
+     * @return array relation name at index 0, field name at index 1
+     */
+    protected function splitRelationField($field) {
+        return explode(':', $field);
+    }
+
+    /**
+     * Applies non-relation constraint to query.
+     *
+     * @param Builder $builder query builder
+     * @param string  $field   field name
+     * @param string  $mode    determines how constraint is added to existing query ("or" or "and")
+     */
+    protected function doApply(Builder $builder, $field, $mode = Constraint::MODE_AND) {
         if ($this->operator == Constraint::OPERATOR_IN) {
             $method = $mode != static::MODE_OR ? 'whereIn' : 'orWhereIn';
             $builder->$method($field, $this->value);
