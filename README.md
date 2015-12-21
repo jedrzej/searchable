@@ -12,12 +12,12 @@ You could also find those packages useful:
 
 Add the following line to `composer.json` file in your project:
 
-    "jedrzej/searchable": "0.0.7"
+    "jedrzej/searchable": "0.0.9"
 	
 or run the following in the commandline in your project's root folder:	
 
 
-    composer require "jedrzej/searchable" "0.0.8"
+    composer require "jedrzej/searchable" "0.0.9"
 
 ## Setting up searchable models
 
@@ -126,8 +126,11 @@ In order to achieve that provide an array of query filters instead of a single f
 
 ## Filtering by relation attributes
 It is possible to filter by attributes of model's relations - Eloquent's ```whereHas()``` will be applied. In order to filter
- by relation, add the relation attribute to the list of ```searchable``` fields in the form ```relation:attribute```. The same string
- should be used in the query to filter by that relation's attribute, e.g.:
+by relation, add the relation attribute to the list of ```searchable``` fields in the form ```relation:attribute```. The same string
+should be used in the query to filter by that relation's attribute, e.g.:
+
+     // allow filtering on user's active field
+     protected $searchable = ['user:active'];
  
      // filter only posts of active users
      ?user:active=1

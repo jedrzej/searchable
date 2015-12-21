@@ -20,11 +20,10 @@ trait SearchableTrait
      */
     public function scopeFiltered(Builder $builder, array $query = [])
     {
-        $query = $query ?: Input::all();
+        $query = (array)($query ?: Input::all());
 
         $mode = $this->getQueryMode($query);
-
-        $query = array_except($query, $this->getQueryModeParameterName());
+        $query = $this->filterNonSearchableParameters($query);
         $constraints = $this->getConstraints($builder, $query);
 
         $this->applyConstraints($builder, $constraints, $mode);
@@ -170,5 +169,25 @@ trait SearchableTrait
         }
 
         throw new RuntimeException(sprintf('Model %s must either implement getSearchableAttributes() or have $searchable property set', get_class($builder->getModel())));
+    }
+
+    /**
+     * Removes parameters that have special meaning to the trait or related sortable/withable traits
+     *
+     * @param array $query query
+     * @return array query without special parameters that model should not be searched on
+     */
+    protected function filterNonSearchableParameters(array $query) {
+        $nonSearchableParameterNames = [$this->getQueryModeParameterName()];
+
+        if (property_exists($this, 'withParameterName')) {
+            $nonSearchableParameterNames[] = $this->withParameterName;
+        }
+
+        if (property_exists($this, 'sortParameterName')) {
+            $nonSearchableParameterNames[] = $this->sortParameterName;
+        }
+
+        return array_except($query, $nonSearchableParameterNames);
     }
 }
