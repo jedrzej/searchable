@@ -20,7 +20,8 @@
     }
   ],
   "require": {
-    "laravel/framework": "*"
+    "illuminate/database": "*",
+    "illuminate/support": "*"
   },
   "require-dev": {
     "codeception/codeception": "2.0.*",
