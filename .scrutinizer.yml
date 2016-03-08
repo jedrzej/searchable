@@ -9,7 +9,9 @@ build:
     tests:
         before:
             - 'vendor/codeception/codeception/codecept build'
-            - 'vendor/codeception/codeception/codecept run --coverage --xml'
+            -
+              command: 'vendor/codeception/codeception/codecept run --coverage --xml'
+              idle_timeout: 900
             - 'wget https://scrutinizer-ci.com/ocular.phar'
             - 'php ocular.phar code-coverage:upload --repository=g/jedrzej/searchable --format=php-clover tests/_output/report.xml'
 checks:
