@@ -12,12 +12,12 @@ You could also find those packages useful:
 
 Add the following line to `composer.json` file in your project:
 
-    "jedrzej/searchable": "0.0.10"
+    "jedrzej/searchable": "0.0.11"
 	
 or run the following in the commandline in your project's root folder:	
 
 
-    composer require "jedrzej/searchable" "0.0.10"
+    composer require "jedrzej/searchable" "0.0.11"
 
 ## Setting up searchable models
 
@@ -43,6 +43,29 @@ You can either define a $searchable property or implement a getSearchableAttribu
 In order to make all fields searchable put an asterisk * in the list of searchable fields:
 
     public $searchable = ['*'];
+
+It is also possible to blacklist model's attributes to prevent it from being filtered on.
+
+You can either define a $notSearchable property or implement a getNotSearchableAttributes method if you want to execute some logic to define list of searchable fields.
+
+    use Jedrzej\Searchable\SearchableTrait;
+
+    class Post extends Eloquent
+    {
+        use SearchableTrait;
+
+        // either a property holding a list of not searchable fields...
+        public $notSearchable = ['created_at'];
+
+        // ...or a method that returns a list of not searchable fields
+        public function getNotSearchableAttributes()
+        {
+            return ['created_at'];
+        }
+    }
+
+If you define both lists - searchable and not searchable columns - the resulting set of searchable fields will contain
+all whitelisted attributes except all blacklisted attributes.
 
 ## Searching models
 

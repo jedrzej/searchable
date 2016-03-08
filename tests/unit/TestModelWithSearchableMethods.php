@@ -3,7 +3,7 @@
 use Illuminate\Database\Eloquent\Builder;
 use Jedrzej\Searchable\Constraint;
 
-class TestModelWithSearchableMethod extends TestModel
+class TestModelWithSearchableMethods extends TestModel
 {
     /**
      * Returns list of searchable fields
@@ -13,6 +13,16 @@ class TestModelWithSearchableMethod extends TestModel
     public function getSearchableAttributes()
     {
         return ['field1', 'field2'];
+    }
+
+    /**
+     * Returns list of not searchable fields
+     *
+     * @return array
+     */
+    public function getNotSearchableAttributes()
+    {
+        return ['page'];
     }
 
     public function processField2Filter(Builder $builder, Constraint $constraint) {
