@@ -44,6 +44,29 @@ In order to make all fields searchable put an asterisk * in the list of searchab
 
     public $searchable = ['*'];
 
+It is also possible to blacklist model's attributes to prevent it from being filtered on.
+
+You can either define a $notSearchable property or implement a getNotSearchableAttributes method if you want to execute some logic to define list of searchable fields.
+
+    use Jedrzej\Searchable\SearchableTrait;
+
+    class Post extends Eloquent
+    {
+        use SearchableTrait;
+
+        // either a property holding a list of not searchable fields...
+        public $notSearchable = ['created_at'];
+
+        // ...or a method that returns a list of not searchable fields
+        public function getNotSearchableAttributes()
+        {
+            return ['created_at'];
+        }
+    }
+
+If you define both lists - searchable and not searchable columns - the resulting set of searchable fields will contain
+all whitelisted attributes except all blacklisted attributes.
+
 ## Searching models
 
 `SearchableTrait` adds a `filtered()` scope to the model - you can pass it a query being an array of filter conditions:

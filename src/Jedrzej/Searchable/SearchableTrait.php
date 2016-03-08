@@ -60,8 +60,9 @@ trait SearchableTrait
     protected function isFieldSearchable(Builder $builder, $field)
     {
         $searchable = $this->_getSearchableAttributes($builder);
+        $notSearchable =  $this->_getNotSearchableAttributes($builder);
 
-        return in_array($field, $searchable) || in_array('*', $searchable);
+        return !in_array($field, $notSearchable) && !in_array('*', $notSearchable) && (in_array($field, $searchable) || in_array('*', $searchable));
     }
 
     /**
@@ -189,5 +190,20 @@ trait SearchableTrait
         }
 
         return array_except($query, $nonSearchableParameterNames);
+    }
+
+    /**
+     * @param Builder $builder
+     * @return array|mixed
+     */
+    protected function _getNotSearchableAttributes(Builder $builder)
+    {
+        if (method_exists($builder->getModel(), 'getNotSearchableAttributes')) {
+            return $builder->getModel()->getNotSearchableAttributes();
+        } else if (property_exists($builder->getModel(), 'notSearchable')) {
+            return $builder->getModel()->notSearchable;
+        }
+
+        return [];
     }
 }
