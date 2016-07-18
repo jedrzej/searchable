@@ -16,7 +16,6 @@ Add the following line to `composer.json` file in your project:
 	
 or run the following in the commandline in your project's root folder:	
 
-
     composer require "jedrzej/searchable" "0.0.11"
 
 ## Setting up searchable models
@@ -24,45 +23,51 @@ or run the following in the commandline in your project's root folder:
 In order to make an Eloquent model searchable, add the trait to the model and define a list of fields that the model can be filtered by.
 You can either define a $searchable property or implement a getSearchableAttributes method if you want to execute some logic to define list of searchable fields.
 
-    use Jedrzej\Searchable\SearchableTrait;
-    
-    class Post extends Eloquent
-    {
-        use SearchableTrait;
+```php
+use Jedrzej\Searchable\SearchableTrait;
 
-        // either a property holding a list of searchable fields...
-        public $searchable = ['title', 'forum_id', 'user_id', 'created_at'];
-
-        // ...or a method that returns a list of searchable fields
-        public function getSearchableAttributes()
-        {
-            return ['title', 'forum_id', 'user_id', 'created_at'];
-        }
-    }
+class Post extends Eloquent
+{
+	use SearchableTrait;
+	
+	// either a property holding a list of searchable fields...
+	public $searchable = ['title', 'forum_id', 'user_id', 'created_at'];
+	
+	// ...or a method that returns a list of searchable fields
+	public function getSearchableAttributes()
+	{
+	    return ['title', 'forum_id', 'user_id', 'created_at'];
+	}
+}
+```
 
 In order to make all fields searchable put an asterisk * in the list of searchable fields:
 
-    public $searchable = ['*'];
+```php
+public $searchable = ['*'];
+```
 
 It is also possible to blacklist model's attributes to prevent it from being filtered on.
 
 You can either define a $notSearchable property or implement a getNotSearchableAttributes method if you want to execute some logic to define list of searchable fields.
 
-    use Jedrzej\Searchable\SearchableTrait;
+```php
+use Jedrzej\Searchable\SearchableTrait;
 
-    class Post extends Eloquent
-    {
-        use SearchableTrait;
-
-        // either a property holding a list of not searchable fields...
-        public $notSearchable = ['created_at'];
-
-        // ...or a method that returns a list of not searchable fields
-        public function getNotSearchableAttributes()
-        {
-            return ['created_at'];
-        }
-    }
+class Post extends Eloquent
+{
+	use SearchableTrait;
+	
+	// either a property holding a list of not searchable fields...
+	public $notSearchable = ['created_at'];
+	
+	// ...or a method that returns a list of not searchable fields
+	public function getNotSearchableAttributes()
+	{
+	    return ['created_at'];
+	}
+}
+```
 
 If you define both lists - searchable and not searchable columns - the resulting set of searchable fields will contain
 all whitelisted attributes except all blacklisted attributes.
@@ -70,17 +75,21 @@ all whitelisted attributes except all blacklisted attributes.
 ## Searching models
 
 `SearchableTrait` adds a `filtered()` scope to the model - you can pass it a query being an array of filter conditions:
- 
-    // return all posts with forum_id equal to $forum_id
-    Post::filtered(['forum_id' => $forum_id])->get();
-    
-    // return all posts with with <operator> applied to forum_id
-    Post::filtered(['forum_id' => <operator>])->get();
- 
- or it will use `Input::all()` as default:
-    
-    // if you append ?forum_id=<operator> to the URL, you'll get all Posts with <operator> applied to forum_id
-    Post::filtered()->get();
+
+```php
+// return all posts with forum_id equal to $forum_id
+Post::filtered(['forum_id' => $forum_id])->get();
+
+// return all posts with with <operator> applied to forum_id
+Post::filtered(['forum_id' => <operator>])->get();
+```
+
+or it will use `Input::all()` as default:
+
+```php  
+// if you append ?forum_id=<operator> to the URL, you'll get all Posts with <operator> applied to forum_id
+Post::filtered()->get();
+````
 
 ## Choosing query mode
 The default query mode is to apply conjunction (```AND```) of all queries to searchable model. It can be changed to disjunction (```OR```)
