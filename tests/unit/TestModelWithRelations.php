@@ -8,11 +8,11 @@ class TestModelWithRelations extends TestModel
     protected $searchable = ['relationA:field'];
 
     public function relationA() {
-        return $this->belongsTo(TestModel::class);
+        return $this->belongsTo('\TestModel');
     }
 
     public function relationB() {
-        return $this->belongsTo(TestModel::class);
+        return $this->belongsTo('\TestModel');
     }
 
     public function processRelationA_FieldFilter(Builder $builder, Constraint $constraint) {
