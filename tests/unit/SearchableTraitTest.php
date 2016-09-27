@@ -209,5 +209,17 @@ class SearchableTraitTest extends Test
 
             $this->assertCount(2, (array)TestModelWithAllFieldsExceptPageSearchable::filtered(['field1' => 5, 'field42' => 3])->getQuery()->wheres);
         });
+
+        $this->specify("relation filter interceptor is called correctly", function () {
+            $this->assertCount(1, (array)TestModelWithRelations::filtered(['relationA:field' => 5])->getQuery()->wheres);
+            $where = (array)TestModelWithRelations::filtered(['relationA:field' => 5])->getQuery()->wheres[0];
+            $this->assertEquals('Basic', $where['type']);
+            $this->assertEquals('5', $where['value']);
+            $this->assertEquals('=', $where['operator']);
+            $this->assertEquals('relation_a_field', $where['column']);
+
+            $this->assertCount(0, (array)TestModelWithRelations::filtered(['relationA:field2' => 5])->getQuery()->wheres);
+            $this->assertCount(0, (array)TestModelWithRelations::filtered(['relationB:field' => 5])->getQuery()->wheres);
+        });
     }
 }

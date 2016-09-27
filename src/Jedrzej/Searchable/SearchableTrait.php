@@ -97,7 +97,7 @@ trait SearchableTrait
     protected function callInterceptor(Builder $builder, $field, Constraint $constraint)
     {
         $model = $builder->getModel();
-        $interceptor = sprintf('process%sFilter', Str::studly($field));
+        $interceptor = sprintf('process%sFilter', str_replace(':', '_', Str::studly($field)));
 
         if (method_exists($model, $interceptor)) {
             if ($model->$interceptor($builder, $constraint)) {
