@@ -166,3 +166,30 @@ should be used in the query to filter by that relation's attribute, e.g.:
  
      // filter only posts of active users
      ?user:active=1
+
+## Overriding default filter logic
+It is possible to process selected filters with your own logic, e.g. when filter name doesn't match the name of attribute that is used for filtering
+or some custom operations need to be executed. In order to override logic for filter `xyz`, you'll need to define a method in your model called `processXyzFilter`.
+This method should return `true`, if filter has been processed and default logic should no longer happen.
+
+```php
+ // use one filter to search in multiple columns
+ protected function processNameFilter(Builder $builder, Constraint $constraint)
+ {
+     // this logic should happen for LIKE/EQUAL operators only
+     if ($constraint->getOperator() === Constraint::OPERATOR_LIKE || $constraint->getOperator() === Constraint::OPERATOR_EQUAL) {
+         $builder->where(function ($query) use ($constraint) {
+             $query->where('first_name', $constraint->getOperator(), $constraint->getValue())
+                 ->orWhere('last_name', $constraint->getOperator(), $constraint->getValue());
+         });
+
+         return true;
+     }
+
+     // default logic should be executed otherwise
+     return false;
+ }
+````
+
+In order to override a filter for relation search, replace the colon in the filter name with underscore.
+If you wanted to override logic for `user:active`, you'd need to define `processUser_ActiveFilter` method.
