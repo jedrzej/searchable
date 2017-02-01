@@ -17,11 +17,17 @@ class Constraint
     const OPERATOR_LIKE = 'like';
     const OPERATOR_NOT_LIKE = 'not like';
 
+    const OPERATOR_NOT_ILIKE = 'ilike';
+    const OPERATOR_ILIKE = 'not ilike';
+
     const OPERATOR_IN = 'in';
     const OPERATOR_NOT_IN = 'not in';
 
     const MODE_AND = 'and';
     const MODE_OR = 'or';
+
+    const MODE_CI = 'ci';
+    const MODE_CS = 'cs';
 
     protected $operator;
 
@@ -60,11 +66,11 @@ class Constraint
      *
      * @return Constraint
      */
-    public static function make($value)
+    public static function make($value, $caseMode = Constraint::MODE_CS)
     {
         $value = static::prepareValue($value);
         $is_negation = static::parseIsNegation($value);
-        list($operator, $value) = static::parseOperatorAndValue($value, $is_negation);
+        list($operator, $value) = static::parseOperatorAndValue($value, $is_negation, $caseMode);
 
         return new static($operator, $value, $is_negation);
     }
@@ -179,13 +185,13 @@ class Constraint
      *
      * @throws InvalidArgumentException when unable to parse operator or value
      */
-    protected static function parseOperatorAndValue($value, $is_negation)
+    protected static function parseOperatorAndValue($value, $is_negation, $caseMode)
     {
         if ($result = static::parseComparisonOperator($value, $is_negation)) {
             return $result;
         }
 
-        if ($result = static::parseLikeOperator($value, $is_negation)) {
+        if ($result = static::parseLikeOperator($value, $is_negation, $caseMode)) {
             return $result;
         }
 
@@ -235,9 +241,13 @@ class Constraint
      *
      * @return string[]|false
      */
-    protected static function parseLikeOperator($value, $is_negation)
+    protected static function parseLikeOperator($value, $is_negation, $caseMode)
     {
         if (preg_match('/(^%.+)|(.+%$)/', $value)) {
+
+            if($caseMode == static::MODE_CI) {
+                return [$is_negation ? static::OPERATOR_NOT_ILIKE : static::OPERATOR_ILIKE, $value];
+            }
             return [$is_negation ? static::OPERATOR_NOT_LIKE : static::OPERATOR_LIKE, $value];
         }
 

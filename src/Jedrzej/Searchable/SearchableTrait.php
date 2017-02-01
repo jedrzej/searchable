@@ -12,6 +12,11 @@ trait SearchableTrait
         return 'mode';
     }
 
+    public function getQueryCaseModeParameterName()
+    {
+        return 'ci';
+    }
+
     /**
      * Applies filters.
      *
@@ -23,10 +28,11 @@ trait SearchableTrait
         $query = (array)($query ?: Input::all());
 
         $mode = $this->getQueryMode($query);
+        $caseMode = $this->getQueryCaseMode($query);
         $query = $this->filterNonSearchableParameters($query);
-        $constraints = $this->getConstraints($builder, $query);
+        $constraints = $this->getConstraints($builder, $query, $caseMode);
 
-        $this->applyConstraints($builder, $constraints, $mode);
+        $this->applyConstraints($builder, $constraints, $mode, $caseMode);
     }
 
     /**
@@ -37,12 +43,12 @@ trait SearchableTrait
      *
      * @return array
      */
-    protected function getConstraints(Builder $builder, array $query)
+    protected function getConstraints(Builder $builder, array $query, $caseMode = Constraint::MODE_CS)
     {
         $constraints = [];
         foreach ($query as $field => $values) {
             if ($this->isFieldSearchable($builder, $field)) {
-                $constraints[$field] = $this->buildConstraints($values);
+                $constraints[$field] = $this->buildConstraints($values, $caseMode);
             }
         }
 
@@ -72,15 +78,15 @@ trait SearchableTrait
      * @param Constraint[] $constraints constraints
      * @param string       $mode        determines how constraints are applied ("or" or "and")
      */
-    protected function applyConstraints(Builder $builder, array $constraints, $mode = Constraint::MODE_AND)
+    protected function applyConstraints(Builder $builder, array $constraints, $mode = Constraint::MODE_AND, $caseMode = Constraint::MODE_CS)
     {
         foreach ($constraints as $field => $constraint) {
             if (is_array($constraint)) {
                 foreach ($constraint as $single_constraint) {
-                    $this->applyConstraint($builder, $field, $single_constraint, $mode);
+                    $this->applyConstraint($builder, $field, $single_constraint, $mode, $caseMode);
                 }
             } else {
-                $this->applyConstraint($builder, $field, $constraint, $mode);
+                $this->applyConstraint($builder, $field, $constraint, $mode, $caseMode);
             }
         }
     }
@@ -115,16 +121,16 @@ trait SearchableTrait
      *
      * @return Constraint[]|Constraint
      */
-    protected function buildConstraints($values)
+    protected function buildConstraints($values, $caseMode)
     {
         if (is_array($values)) {
             $constraints = [];
             foreach ($values as $value) {
-                $constraints[] = Constraint::make($value);
+                $constraints[] = Constraint::make($value, $caseMode);
             }
             return $constraints;
         } else {
-            return Constraint::make($values);
+            return Constraint::make($values, $caseMode);
         }
     }
 
@@ -136,11 +142,11 @@ trait SearchableTrait
      * @param Constraint $constraint constraint
      * @param string     $mode       determines how constraint is applied ("or" or "and")
      */
-    protected function applyConstraint(Builder $builder, $field, $constraint, $mode = Constraint::MODE_AND)
+    protected function applyConstraint(Builder $builder, $field, $constraint, $mode = Constraint::MODE_AND, $caseMode = Constraint::MODE_CS)
     {
         // let model handle the constraint if it has the interceptor
         if (!$this->callInterceptor($builder, $field, $constraint)) {
-            $constraint->apply($builder, $field, $mode);
+            $constraint->apply($builder, $field, $mode, $caseMode);
         }
     }
 
@@ -154,6 +160,18 @@ trait SearchableTrait
     protected function getQueryMode(array $query = [])
     {
         return array_get($query, $this->getQueryModeParameterName(), Constraint::MODE_AND);
+    }
+
+    /**
+     * Determines if the searach is going to be use case sensitve ("LIKE" or "ILIKE")
+     *
+     * @param array $query query parameters
+     *
+     * @return mixed
+     */
+    protected function getQueryCaseMode(array $query = [])
+    {
+        return array_get($query, $this->getQueryCaseModeParameterName(), Constraint::MODE_CS);
     }
 
     /**
@@ -180,6 +198,7 @@ trait SearchableTrait
      */
     protected function filterNonSearchableParameters(array $query) {
         $nonSearchableParameterNames = [$this->getQueryModeParameterName()];
+        $nonSearchableParameterNames[] = $this->getQueryCaseModeParameterName();
 
         if (property_exists($this, 'withParameterName')) {
             $nonSearchableParameterNames[] = $this->withParameterName;
