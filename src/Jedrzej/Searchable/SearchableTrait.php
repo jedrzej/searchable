@@ -198,6 +198,7 @@ trait SearchableTrait
      */
     protected function filterNonSearchableParameters(array $query) {
         $nonSearchableParameterNames = [$this->getQueryModeParameterName()];
+        $nonSearchableParameterNames[] = $this->getQueryCaseModeParameterName();
 
         if (property_exists($this, 'withParameterName')) {
             $nonSearchableParameterNames[] = $this->withParameterName;
