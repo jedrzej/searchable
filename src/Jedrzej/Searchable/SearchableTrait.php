@@ -30,7 +30,7 @@ trait SearchableTrait
         $mode = $this->getQueryMode($query);
         $caseMode = $this->getQueryCaseMode($query);
         $query = $this->filterNonSearchableParameters($query);
-        $constraints = $this->getConstraints($builder, $query);
+        $constraints = $this->getConstraints($builder, $query, $caseMode);
 
         $this->applyConstraints($builder, $constraints, $mode, $caseMode);
     }
