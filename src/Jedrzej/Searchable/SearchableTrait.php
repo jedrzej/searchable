@@ -62,6 +62,8 @@ trait SearchableTrait
         $searchable = $this->_getSearchableAttributes($builder);
         $notSearchable =  $this->_getNotSearchableAttributes($builder);
 
+        $field = preg_replace('#^!#', '', $field);
+
         return !in_array($field, $notSearchable) && !in_array('*', $notSearchable) && (in_array($field, $searchable) || in_array('*', $searchable));
     }
 

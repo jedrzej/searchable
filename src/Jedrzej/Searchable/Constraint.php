@@ -80,9 +80,15 @@ class Constraint
     {
         if ($this->isRelation($field)) {
             list($relation, $field) = $this->splitRelationField($field);
-            $builder->whereHas($relation, function(Builder $builder) use ($field, $mode) {
-                $this->doApply($builder, $field, $mode) ;
-            });
+            if (static::parseIsNegation($relation)) {
+                $builder->whereDoesntHave($relation, function(Builder $builder) use ($field, $mode) {
+                    $this->doApply($builder, $field, $mode) ;
+                });
+            } else {
+                $builder->whereHas($relation, function(Builder $builder) use ($field, $mode) {
+                    $this->doApply($builder, $field, $mode) ;
+                });
+            }
         } else {
             $this->doApply($builder, $field, $mode) ;
         }

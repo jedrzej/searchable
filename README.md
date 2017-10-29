@@ -12,11 +12,11 @@ You could also find those packages useful:
 
 Add the following line to `composer.json` file in your project:
 
-    "jedrzej/searchable": "0.0.11"
+    "jedrzej/searchable": "0.0.12"
 	
 or run the following in the commandline in your project's root folder:	
 
-    composer require "jedrzej/searchable" "0.0.11"
+    composer require "jedrzej/searchable" "0.0.12"
 
 ## Setting up searchable models
 
@@ -166,6 +166,21 @@ should be used in the query to filter by that relation's attribute, e.g.:
  
      // filter only posts of active users
      ?user:active=1
+     
+It's also possible to negate the search and filter objects that don't have a matching relation by applying Eloquent's ```whereDoesntHave()```. 
+In order to do that, prefix relation name with ```!```:
+
+     // allow filtering on comment's approved field
+     protected $searchable = ['comments:approved'];
+ 
+     // filter only posts that have approved comments
+     ?comments:approved=1
+          
+     // filter only posts that have not-approved comments
+     ?comments:approved=1
+     
+     // filter only posts that do not have approved comments
+     ?!comments:approved=1
 
 ## Overriding default filter logic
 It is possible to process selected filters with your own logic, e.g. when filter name doesn't match the name of attribute that is used for filtering
