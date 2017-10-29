@@ -110,6 +110,14 @@ class SearchableTraitTest extends Test
             $this->assertEquals('abc%', $where['value']);
             $this->assertEquals('not like', $where['operator']);
             $this->assertEquals('field1', $where['column']);
+
+            $where = TestModelWithSearchableMethods::filtered(['field1' => '(null)'])->getQuery()->wheres[0];
+            $this->assertEquals('Null', $where['type']);
+            $this->assertEquals('field1', $where['column']);
+
+            $where = TestModelWithSearchableMethods::filtered(['field1' => '!(null)'])->getQuery()->wheres[0];
+            $this->assertEquals('NotNull', $where['type']);
+            $this->assertEquals('field1', $where['column']);
         });
 
         $this->specify("models are able to handle selected query constraints themselves", function () {

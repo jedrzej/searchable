@@ -20,6 +20,9 @@ class Constraint
     const OPERATOR_IN = 'in';
     const OPERATOR_NOT_IN = 'not in';
 
+    const OPERATOR_NULL = 'is null';
+    const OPERATOR_NOT_NULL = 'is not null';
+
     const MODE_AND = 'and';
     const MODE_OR = 'or';
 
@@ -73,24 +76,24 @@ class Constraint
      * Applies constraint to query.
      *
      * @param Builder $builder query builder
-     * @param string  $field   field name
-     * @param string  $mode    determines how constraint is added to existing query ("or" or "and")
+     * @param string $field field name
+     * @param string $mode determines how constraint is added to existing query ("or" or "and")
      */
     public function apply(Builder $builder, $field, $mode = Constraint::MODE_AND)
     {
         if ($this->isRelation($field)) {
             list($relation, $field) = $this->splitRelationField($field);
             if (static::parseIsNegation($relation)) {
-                $builder->whereDoesntHave($relation, function(Builder $builder) use ($field, $mode) {
-                    $this->doApply($builder, $field, $mode) ;
+                $builder->whereDoesntHave($relation, function (Builder $builder) use ($field, $mode) {
+                    $this->doApply($builder, $field, $mode);
                 });
             } else {
-                $builder->whereHas($relation, function(Builder $builder) use ($field, $mode) {
-                    $this->doApply($builder, $field, $mode) ;
+                $builder->whereHas($relation, function (Builder $builder) use ($field, $mode) {
+                    $this->doApply($builder, $field, $mode);
                 });
             }
         } else {
-            $this->doApply($builder, $field, $mode) ;
+            $this->doApply($builder, $field, $mode);
         }
     }
 
@@ -100,7 +103,8 @@ class Constraint
      * @param string $field field name
      * @return bool true if field contains relation name
      */
-    protected function isRelation($field) {
+    protected function isRelation($field)
+    {
         return strpos($field, ':') !== false;
     }
 
@@ -109,7 +113,8 @@ class Constraint
      * @param string $field field name
      * @return array relation name at index 0, field name at index 1
      */
-    protected function splitRelationField($field) {
+    protected function splitRelationField($field)
+    {
         return explode(':', $field);
     }
 
@@ -117,16 +122,23 @@ class Constraint
      * Applies non-relation constraint to query.
      *
      * @param Builder $builder query builder
-     * @param string  $field   field name
-     * @param string  $mode    determines how constraint is added to existing query ("or" or "and")
+     * @param string $field field name
+     * @param string $mode determines how constraint is added to existing query ("or" or "and")
      */
-    protected function doApply(Builder $builder, $field, $mode = Constraint::MODE_AND) {
+    protected function doApply(Builder $builder, $field, $mode = Constraint::MODE_AND)
+    {
         if ($this->operator == Constraint::OPERATOR_IN) {
             $method = $mode != static::MODE_OR ? 'whereIn' : 'orWhereIn';
             $builder->$method($field, $this->value);
         } elseif ($this->operator == Constraint::OPERATOR_NOT_IN) {
             $method = $mode != static::MODE_OR ? 'whereNotIn' : 'orWhereNotIn';
             $builder->$method($field, $this->value);
+        } elseif ($this->operator == Constraint::OPERATOR_NOT_NULL) {
+            $method = $mode != static::MODE_OR ? 'whereNotNull' : 'orWhereNotNull';
+            $builder->$method($field);
+        } elseif ($this->operator == Constraint::OPERATOR_NULL) {
+            $method = $mode != static::MODE_OR ? 'whereNull' : 'orWhereNull';
+            $builder->$method($field);
         } else {
             $method = $mode != static::MODE_OR ? 'where' : 'orWhere';
             $builder->$method($field, $this->operator, $this->value);
@@ -135,8 +147,8 @@ class Constraint
 
     /**
      * @param string $operator operator
-     * @param string $value    value
-     * @param bool   $is_negation
+     * @param string $value value
+     * @param bool $is_negation
      */
     protected function __construct($operator, $value, $is_negation = false)
     {
@@ -179,7 +191,7 @@ class Constraint
      * Parse query parameter and get operator and value.
      *
      * @param string $value
-     * @param bool   $is_negation
+     * @param bool $is_negation
      *
      * @return string[]
      *
@@ -195,6 +207,10 @@ class Constraint
             return $result;
         }
 
+        if ($result = static::parseNullOperator($value, $is_negation)) {
+            return $result;
+        }
+
         if ($result = static::parseEqualsInOperator($value, $is_negation)) {
             return $result;
         }
@@ -204,7 +220,7 @@ class Constraint
 
     /**
      * @param string $value
-     * @param bool   $is_negation
+     * @param bool $is_negation
      *
      * @return string[]|false
      */
@@ -237,7 +253,24 @@ class Constraint
 
     /**
      * @param string $value
-     * @param bool   $is_negation
+     * @param bool $is_negation
+     *
+     * @return string[]|false
+     */
+    protected static function parseNullOperator($value, $is_negation)
+    {
+        if ($value === '(null)') {
+            $operator = $is_negation ? static::OPERATOR_NOT_NULL : static::OPERATOR_NULL;
+
+            return [$operator, null];
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $value
+     * @param bool $is_negation
      *
      * @return string[]|false
      */
@@ -252,7 +285,7 @@ class Constraint
 
     /**
      * @param string $value
-     * @param bool   $is_negation
+     * @param bool $is_negation
      *
      * @return string[]
      */
