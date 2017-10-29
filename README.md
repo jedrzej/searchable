@@ -12,11 +12,11 @@ You could also find those packages useful:
 
 Add the following line to `composer.json` file in your project:
 
-    "jedrzej/searchable": "0.0.12"
+    "jedrzej/searchable": "0.0.13"
 	
 or run the following in the commandline in your project's root folder:	
 
-    composer require "jedrzej/searchable" "0.0.12"
+    composer require "jedrzej/searchable" "0.0.13"
 
 ## Setting up searchable models
 
@@ -101,7 +101,7 @@ will be used.
 The `SearchableTrait` supports the following operators:
     
 ### Comparison operators
-Comparison operators allow filtering based on result of comparison of model's attribute and query value. They work for strings, numbers and dates. They have the following for:
+Comparison operators allow filtering based on result of comparison of model's attribute and query value. They work for strings, numbers and dates. They have the following format:
     
     (<operator>)<value>
 
@@ -138,6 +138,13 @@ In order to filter posts that start with `How`, the following query should be us
 ```Notice:``` percentage character is used to encode special characters in URLs, so when sending the request make sure the tools
 you use properly ```encode the % character as %25```
     
+### Null operator
+Null operator ```(null)``` allows filtering models whose attribute is null.
+
+In order to filter posts that have no attachment, the following query should be used:
+
+    ?attachment_id=(null)
+
 ### Negation operator
 It is possible to get negated results of a query by prepending the operator with `!`.
     
@@ -149,6 +156,9 @@ Some examples:
     //filter posts older than 2015
     ?created_at=!(ge)2015
     
+    //filter posts with attachment
+    ?attachment_id=!(null)
+
 ### Multiple constraints for single attribute
 It is possible to apply multiple constraints for a single model's attribute. 
 In order to achieve that provide an array of query filters instead of a single filter:
