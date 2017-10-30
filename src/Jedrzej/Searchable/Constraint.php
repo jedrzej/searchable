@@ -115,7 +115,10 @@ class Constraint
      */
     protected function splitRelationField($field)
     {
-        return explode(':', $field);
+        $parts = explode(':', $field);
+        $partsCount = count($parts);
+
+        return [implode('.', array_slice($parts, 0, $partsCount - 1)), $parts[$partsCount - 1]];
     }
 
     /**
