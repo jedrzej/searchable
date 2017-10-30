@@ -12,11 +12,11 @@ You could also find those packages useful:
 
 Add the following line to `composer.json` file in your project:
 
-    "jedrzej/searchable": "0.0.13"
+    "jedrzej/searchable": "0.0.14"
 	
 or run the following in the commandline in your project's root folder:	
 
-    composer require "jedrzej/searchable" "0.0.13"
+    composer require "jedrzej/searchable" "0.0.14"
 
 ## Setting up searchable models
 
@@ -191,6 +191,12 @@ In order to do that, prefix relation name with ```!```:
      
      // filter only posts that do not have approved comments
      ?!comments:approved=1
+
+If you want to filter by a nested relation, just provide the nested relation's name with the dot replaced by colon. It's necessary as PHP
+automatically replaces dots with underscores in the URL.
+
+     // filter only posts that have comments from active authors
+     ?comments:author:active=1
 
 ## Overriding default filter logic
 It is possible to process selected filters with your own logic, e.g. when filter name doesn't match the name of attribute that is used for filtering
