@@ -90,19 +90,20 @@ trait SearchableTrait
     /**
      * Calls constraint interceptor on model.
      *
-     * @param Builder    $builder    query builder
-     * @param string     $field      field on which constraint is applied
+     * @param Builder    $builder query builder
+     * @param string     $field field on which constraint is applied
      * @param Constraint $constraint constraint
+     * @param string     $mode The mode.
      *
      * @return bool true if constraint was intercepted by model's method
      */
-    protected function callInterceptor(Builder $builder, $field, Constraint $constraint)
+    protected function callInterceptor(Builder $builder, $field, Constraint $constraint, $mode = Constraint::MODE_AND)
     {
         $model = $builder->getModel();
         $interceptor = sprintf('process%sFilter', str_replace(':', '_', Str::studly($field)));
 
         if (method_exists($model, $interceptor)) {
-            if ($model->$interceptor($builder, $constraint)) {
+            if ($model->$interceptor($builder, $constraint, $mode)) {
                 return true;
             }
         }
@@ -141,7 +142,7 @@ trait SearchableTrait
     protected function applyConstraint(Builder $builder, $field, $constraint, $mode = Constraint::MODE_AND)
     {
         // let model handle the constraint if it has the interceptor
-        if (!$this->callInterceptor($builder, $field, $constraint)) {
+        if (!$this->callInterceptor($builder, $field, $constraint, $mode)) {
             $constraint->apply($builder, $field, $mode);
         }
     }
