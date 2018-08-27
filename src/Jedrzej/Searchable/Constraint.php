@@ -84,11 +84,11 @@ class Constraint
         if ($this->isRelation($field)) {
             list($relation, $field) = $this->splitRelationField($field);
             if (static::parseIsNegation($relation)) {
-                $builder->whereDoesntHave($relation, function (Builder $builder) use ($field, $mode) {
+                $builder->doesntHave($relation, $mode, function (Builder $builder) use ($field, $mode) {
                     $this->doApply($builder, $field, $mode);
                 });
             } else {
-                $builder->whereHas($relation, function (Builder $builder) use ($field, $mode) {
+                $builder->has($relation,'>=',1,$mode, function (Builder $builder) use ($field, $mode) {
                     $this->doApply($builder, $field, $mode);
                 });
             }
