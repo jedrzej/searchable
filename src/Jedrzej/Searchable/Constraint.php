@@ -143,12 +143,8 @@ class Constraint
             $method = $mode != static::MODE_OR ? 'whereNull' : 'orWhereNull';
             $builder->$method($field);
         } else {
-            if ($relation === true) {
-                $builder->where($field, $this->operator, $this->value);
-            } else {
-                $method = $mode != static::MODE_OR ? 'where' : 'orWhere';
-                $builder->$method($field, $this->operator, $this->value);
-            }
+            $method = $mode != static::MODE_OR ? 'where' : 'orWhere';
+            $builder->$method($field, $this->operator, $this->value);
         }
     }
 
