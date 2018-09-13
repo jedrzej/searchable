@@ -85,11 +85,11 @@ class Constraint
             list($relation, $field) = $this->splitRelationField($field);
             if (static::parseIsNegation($relation)) {
                 $builder->doesntHave($relation, $mode, function (Builder $builder) use ($field, $mode) {
-                    $this->doApply($builder, $field, $mode, true);
+                    $this->doApplyRelation($builder, $field, $mode);
                 });
             } else {
                 $builder->has($relation,'>=',1,$mode, function (Builder $builder) use ($field, $mode) {
-                    $this->doApply($builder, $field, $mode, true);
+                    $this->doApplyRelation($builder, $field, $mode);
                 });
             }
         } else {
@@ -128,7 +128,7 @@ class Constraint
      * @param string $field field name
      * @param string $mode determines how constraint is added to existing query ("or" or "and")
      */
-    protected function doApply(Builder $builder, $field, $mode = Constraint::MODE_AND, $relation = false)
+    protected function doApply(Builder $builder, $field, $mode = Constraint::MODE_AND)
     {
         if ($this->operator == Constraint::OPERATOR_IN) {
             $method = $mode != static::MODE_OR ? 'whereIn' : 'orWhereIn';
@@ -149,6 +149,33 @@ class Constraint
                 $method = $mode != static::MODE_OR ? 'where' : 'orWhere';
                 $builder->$method($field, $this->operator, $this->value);
             }
+        }
+    }
+
+    /**
+     * Applies non-relation constraint to query.
+     *
+     * @param Builder $builder query builder
+     * @param string $field field name
+     * @param string $mode determines how constraint is added to existing query ("or" or "and")
+     */
+    protected function doApplyRelation(Builder $builder, $field, $mode = Constraint::MODE_AND)
+    {
+        if ($this->operator == Constraint::OPERATOR_IN) {
+            $method = 'whereIn';
+            $builder->$method($field, $this->value);
+        } elseif ($this->operator == Constraint::OPERATOR_NOT_IN) {
+            $method = 'whereNotIn';
+            $builder->$method($field, $this->value);
+        } elseif ($this->operator == Constraint::OPERATOR_NOT_NULL) {
+            $method = 'whereNotNull';
+            $builder->$method($field);
+        } elseif ($this->operator == Constraint::OPERATOR_NULL) {
+            $method = 'whereNull';
+            $builder->$method($field);
+        } else {
+            $method = 'where';
+            $builder->$method($field, $this->operator, $this->value);
         }
     }
 
