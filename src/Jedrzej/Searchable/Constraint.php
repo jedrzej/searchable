@@ -85,11 +85,11 @@ class Constraint
             list($relation, $field) = $this->splitRelationField($field);
             if (static::parseIsNegation($relation)) {
                 $builder->doesntHave($relation, $mode, function (Builder $builder) use ($field, $mode) {
-                    $this->doApply($builder, $field, $mode);
+                    $this->doApply($builder, $field, $mode, true);
                 });
             } else {
                 $builder->has($relation,'>=',1,$mode, function (Builder $builder) use ($field, $mode) {
-                    $this->doApply($builder, $field, $mode);
+                    $this->doApply($builder, $field, $mode, true);
                 });
             }
         } else {
@@ -128,7 +128,7 @@ class Constraint
      * @param string $field field name
      * @param string $mode determines how constraint is added to existing query ("or" or "and")
      */
-    protected function doApply(Builder $builder, $field, $mode = Constraint::MODE_AND)
+    protected function doApply(Builder $builder, $field, $mode = Constraint::MODE_AND, $relation = false)
     {
         if ($this->operator == Constraint::OPERATOR_IN) {
             $method = $mode != static::MODE_OR ? 'whereIn' : 'orWhereIn';
@@ -143,8 +143,12 @@ class Constraint
             $method = $mode != static::MODE_OR ? 'whereNull' : 'orWhereNull';
             $builder->$method($field);
         } else {
-            $method = $mode != static::MODE_OR ? 'where' : 'orWhere';
-            $builder->$method($field, $this->operator, $this->value);
+            if ($relation === true) {
+                $builder->where($field, $this->operator, $this->value);
+            } else {
+                $method = $mode != static::MODE_OR ? 'where' : 'orWhere';
+                $builder->$method($field, $this->operator, $this->value);
+            }
         }
     }
 
