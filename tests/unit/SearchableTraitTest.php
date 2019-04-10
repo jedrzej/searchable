@@ -229,5 +229,13 @@ class SearchableTraitTest extends Test
             $this->assertCount(0, (array)TestModelWithRelations::filtered(['relationA:field2' => 5])->getQuery()->wheres);
             $this->assertCount(0, (array)TestModelWithRelations::filtered(['relationB:field' => 5])->getQuery()->wheres);
         });
+
+        $this->specify('field names cannot contain white spaces', function() {
+            TestModel::filtered(['field 1' => 5]);
+        }, ['throws' => new InvalidArgumentException]);
+
+        $this->specify('field names cannot contain special characters other than specified', function() {
+            TestModel::filtered(['field)1' => 5]);
+        }, ['throws' => new InvalidArgumentException]);
     }
 }

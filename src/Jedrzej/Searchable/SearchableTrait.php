@@ -4,6 +4,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Str;
 use RuntimeException;
+use InvalidArgumentException;
 
 trait SearchableTrait
 {
@@ -21,6 +22,7 @@ trait SearchableTrait
     public function scopeFiltered(Builder $builder, array $query = [])
     {
         $query = (array)($query ?: Input::all());
+        $this->validateFieldNames($query);
 
         $mode = $this->getQueryMode($query);
         $query = $this->filterNonSearchableParameters($query);
@@ -47,6 +49,19 @@ trait SearchableTrait
         }
 
         return $constraints;
+    }
+
+    /**
+     * Makes sure field names contain only allowed characters
+     *
+     * @param array $query
+     */
+    protected function validateFieldNames(array $query) {
+        foreach ($query as $field => $values) {
+            if (!preg_match('/^!?[a-zA-Z0-9\-_:]+$/', $field)) {
+                throw new InvalidArgumentException(sprintf('Incorrect field name: %s', $field));
+            }
+        }
     }
 
     /**
