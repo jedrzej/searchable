@@ -22,13 +22,42 @@ trait SearchableTrait
     {
         $query = (array)($query ?: Input::all());
 
-        logger()->debug('Query Params', [request(), $query]);
-
         $mode = $this->getQueryMode($query);
-        $query = $this->filterNonSearchableParameters($query);
-        $constraints = $this->getConstraints($builder, $query);
 
-        $this->applyConstraints($builder, $constraints, $mode);
+        $queries = [$mode => []];
+
+        // We need to throw the filtered stuff out here.
+        $query = $this->filterNonSearchableParameters($query);
+
+        // IF the query param looks like `.*__or` or `.*__and` then put it into its own clause.
+        foreach ($query as $index => $queryParam) {
+            if (preg_match('/(.*)__(and|or)$/', $index, $matches)) {
+                $theQuery = $matches[1];
+                $theMode = $matches[2];
+
+                if (!isset($queries[$theMode])) {
+                    $queries[$theMode] = [];
+                }
+
+                $queries[$theMode][$theQuery] = $queryParam;
+            } else {
+                $queries[$mode][$index] = $queryParam;
+            }
+        }
+
+        foreach ($queries as $mode => $newQuery) {
+            logger()->debug("$mode", [$newQuery]);
+
+            // We need to throw the filtered stuff out here, too.
+            $query = $this->filterNonSearchableParameters($newQuery);
+            $constraints = $this->getConstraints($builder, $newQuery);
+
+            // The mode translates to an `where` group and a `orWhere` group.
+            $method = $mode !== 'or' ? 'where' : 'orWhere';
+            $builder->$method(function ($query) use ($constraints, $mode) {
+                $this->applyConstraints($query, $constraints, $mode);
+            });
+        }
     }
 
     /**
