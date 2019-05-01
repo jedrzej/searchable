@@ -50,8 +50,8 @@ trait SearchableTrait
             $query = $this->filterNonSearchableParameters($newQuery);
             $constraints = $this->getConstraints($builder, $query);
 
-            // The mode translates to an `where` group and a `orWhere` group.
-            $method = $mode !== 'or' ? 'where' : 'orWhere';
+            // Always group the stupid things!
+            $method = 'where';
             $builder->$method(function ($query) use ($constraints, $mode) {
                 $this->applyConstraints($query, $constraints, $mode);
             });
