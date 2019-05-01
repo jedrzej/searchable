@@ -22,6 +22,8 @@ trait SearchableTrait
     {
         $query = (array)($query ?: Input::all());
 
+        logger()->debug('Query Params', [request(), $query]);
+
         $mode = $this->getQueryMode($query);
         $query = $this->filterNonSearchableParameters($query);
         $constraints = $this->getConstraints($builder, $query);
