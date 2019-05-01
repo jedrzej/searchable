@@ -46,11 +46,9 @@ trait SearchableTrait
         }
 
         foreach ($queries as $mode => $newQuery) {
-            logger()->debug("$mode", [$newQuery]);
-
             // We need to throw the filtered stuff out here, too.
             $query = $this->filterNonSearchableParameters($newQuery);
-            $constraints = $this->getConstraints($builder, $newQuery);
+            $constraints = $this->getConstraints($builder, $query);
 
             // The mode translates to an `where` group and a `orWhere` group.
             $method = $mode !== 'or' ? 'where' : 'orWhere';
