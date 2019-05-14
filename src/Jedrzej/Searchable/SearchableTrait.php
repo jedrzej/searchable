@@ -58,7 +58,7 @@ trait SearchableTrait
      */
     protected function validateFieldNames(array $query) {
         foreach ($query as $field => $values) {
-            if (!preg_match('/^!?[a-zA-Z0-9\-_:]+$/', $field)) {
+            if (!preg_match('/^!?[a-zA-Z0-9\-_:\.]+$/', $field)) {
                 throw new InvalidArgumentException(sprintf('Incorrect field name: %s', $field));
             }
         }
