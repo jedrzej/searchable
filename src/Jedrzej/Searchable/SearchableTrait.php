@@ -1,7 +1,7 @@
 <?php namespace Jedrzej\Searchable;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -16,11 +16,11 @@ trait SearchableTrait
      * Applies filters.
      *
      * @param Builder $builder query builder
-     * @param array   $query   query parameters to use for search - Input::all() is used by default
+     * @param array   $query   query parameters to use for search - request()->all() is used by default
      */
     public function scopeFiltered(Builder $builder, array $query = [])
     {
-        $query = (array)($query ?: Input::all());
+        $query = (array)($query ?: request()->all());
 
         $mode = $this->getQueryMode($query);
         $query = $this->filterNonSearchableParameters($query);
@@ -155,7 +155,7 @@ trait SearchableTrait
      */
     protected function getQueryMode(array $query = [])
     {
-        return array_get($query, $this->getQueryModeParameterName(), Constraint::MODE_AND);
+        return Arr::get($query, $this->getQueryModeParameterName(), Constraint::MODE_AND);
     }
 
     /**
@@ -191,7 +191,7 @@ trait SearchableTrait
             $nonSearchableParameterNames[] = $this->sortParameterName;
         }
 
-        return array_except($query, $nonSearchableParameterNames);
+        return Arr::except($query, $nonSearchableParameterNames);
     }
 
     /**
