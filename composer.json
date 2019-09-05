@@ -24,8 +24,9 @@
     "illuminate/support": "*"
   },
   "require-dev": {
-    "codeception/codeception": "2.0.*",
-    "codeception/specify": "*"
+    "codeception/codeception": "2.*",
+    "codeception/specify": "*",
+    "codeception/assert-throws": "*"
   },
   "suggest": {
     "jedrzej/sortable": "Allows sorting your models using request parameters",

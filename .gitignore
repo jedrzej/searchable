@@ -1,4 +1,5 @@
 tests/_output/*
+tests/_support/*
 tests/*/*Tester.php
 composer.lock
 vendor

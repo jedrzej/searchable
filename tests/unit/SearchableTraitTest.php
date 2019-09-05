@@ -1,12 +1,13 @@
 <?php
 
 use Codeception\Specify;
+use Codeception\AssertThrows;
 use Codeception\TestCase\Test;
 use Jedrzej\Searchable\Constraint;
 
 class SearchableTraitTest extends Test
 {
-    use Specify;
+    use Specify, AssertThrows;
 
     public function testConstraints()
     {
@@ -169,7 +170,7 @@ class SearchableTraitTest extends Test
                 $this->assertEquals(Constraint::MODE_AND, $where['boolean']);
             }
 
-            $this->assertCount(2, (array)TestModelWithSearchableMethods::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'or'])->getQuery()->wheres);
+            $this->assertCount(2, (array)TestModelWithSearchableMethods::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'or'])->getQuery()->wheres[0]['query']->wheres);
             foreach (TestModelWithSearchableMethods::filtered(['field1' => 5, 'field2' => 3, 'mode' => 'or'])->getQuery()->wheres as $where) {
                 $this->assertEquals(Constraint::MODE_OR, $where['boolean']);
             }
@@ -203,8 +204,10 @@ class SearchableTraitTest extends Test
         });
 
         $this->specify('model must implement getSearchableAttributes() or have $searchable property', function() {
-            TestModel::filtered(['field1' => 5]);
-        }, ['throws' => new RuntimeException]);
+            $this->assertThrows(RuntimeException::class, function() {
+                TestModel::filtered(['field1' => 5]);
+            });
+        });
 
         $this->specify('* in searchable field list makes all fields searchable', function() {
             $this->assertCount(1, (array)TestModelWithAllFieldsExceptPageSearchable::filtered(['field1' => 5, 'page' => 3])->getQuery()->wheres);
@@ -231,11 +234,15 @@ class SearchableTraitTest extends Test
         });
 
         $this->specify('field names cannot contain white spaces', function() {
-            TestModel::filtered(['field 1' => 5]);
-        }, ['throws' => new InvalidArgumentException]);
+            $this->assertThrows(InvalidArgumentException::class, function() {
+                TestModel::filtered(['field 1' => 5]);
+            });
+        });
 
         $this->specify('field names cannot contain special characters other than specified', function() {
-            TestModel::filtered(['field)1' => 5]);
-        }, ['throws' => new InvalidArgumentException]);
+            $this->assertThrows(InvalidArgumentException::class, function() {
+                TestModel::filtered(['field)1' => 5]);
+            });
+        });
     }
 }

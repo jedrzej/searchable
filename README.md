@@ -1,6 +1,6 @@
 # Searchable trait for Laravel's Eloquent models
 
-This package adds search/filtering functionality to Eloquent models in Laravel 4/5.
+This package adds search/filtering functionality to Eloquent models in Laravel 4/5/6.
 
 You could also find those packages useful:
 
@@ -12,11 +12,11 @@ You could also find those packages useful:
 
 Add the following line to `composer.json` file in your project:
 
-    "jedrzej/searchable": "0.0.16"
+    "jedrzej/searchable": "0.0.17"
 	
 or run the following in the commandline in your project's root folder:	
 
-    composer require "jedrzej/searchable" "0.0.16"
+    composer require "jedrzej/searchable" "0.0.17"
 
 ## Setting up searchable models
 
@@ -84,7 +84,7 @@ Post::filtered(['forum_id' => $forum_id])->get();
 Post::filtered(['forum_id' => <operator>])->get();
 ```
 
-or it will use `Input::all()` as default:
+or it will use `Request::all()` as default:
 
 ```php  
 // if you append ?forum_id=<operator> to the URL, you'll get all Posts with <operator> applied to forum_id
