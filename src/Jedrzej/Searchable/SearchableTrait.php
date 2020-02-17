@@ -26,10 +26,39 @@ trait SearchableTrait
         $this->validateFieldNames($query);
 
         $mode = $this->getQueryMode($query);
-        $query = $this->filterNonSearchableParameters($query);
-        $constraints = $this->getConstraints($builder, $query);
 
-        $this->applyConstraints($builder, $constraints, $mode);
+        $queries = [$mode => []];
+
+        // We need to throw the filtered stuff out here.
+        $query = $this->filterNonSearchableParameters($query);
+
+        // IF the query param looks like `.*__or` or `.*__and` then put it into its own clause.
+        foreach ($query as $index => $queryParam) {
+            if (preg_match('/(.*)__(and|or)$/', $index, $matches)) {
+                $theQuery = $matches[1];
+                $theMode = $matches[2];
+
+                if (!isset($queries[$theMode])) {
+                    $queries[$theMode] = [];
+                }
+
+                $queries[$theMode][$theQuery] = $queryParam;
+            } else {
+                $queries[$mode][$index] = $queryParam;
+            }
+        }
+
+        foreach ($queries as $mode => $newQuery) {
+            // We need to throw the filtered stuff out here, too.
+            $query = $this->filterNonSearchableParameters($newQuery);
+            $constraints = $this->getConstraints($builder, $query);
+
+            // Always group the stupid things!
+            $method = 'where';
+            $builder->$method(function ($query) use ($constraints, $mode) {
+                $this->applyConstraints($query, $constraints, $mode);
+            });
+        }
     }
 
     /**
@@ -106,19 +135,20 @@ trait SearchableTrait
     /**
      * Calls constraint interceptor on model.
      *
-     * @param Builder    $builder    query builder
-     * @param string     $field      field on which constraint is applied
+     * @param Builder    $builder query builder
+     * @param string     $field field on which constraint is applied
      * @param Constraint $constraint constraint
+     * @param string     $mode The mode.
      *
      * @return bool true if constraint was intercepted by model's method
      */
-    protected function callInterceptor(Builder $builder, $field, Constraint $constraint)
+    protected function callInterceptor(Builder $builder, $field, Constraint $constraint, $mode = Constraint::MODE_AND)
     {
         $model = $builder->getModel();
         $interceptor = sprintf('process%sFilter', str_replace(':', '_', Str::studly($field)));
 
         if (method_exists($model, $interceptor)) {
-            if ($model->$interceptor($builder, $constraint)) {
+            if ($model->$interceptor($builder, $constraint, $mode)) {
                 return true;
             }
         }
@@ -157,7 +187,7 @@ trait SearchableTrait
     protected function applyConstraint(Builder $builder, $field, $constraint, $mode = Constraint::MODE_AND)
     {
         // let model handle the constraint if it has the interceptor
-        if (!$this->callInterceptor($builder, $field, $constraint)) {
+        if (!$this->callInterceptor($builder, $field, $constraint, $mode)) {
             $constraint->apply($builder, $field, $mode);
         }
     }
